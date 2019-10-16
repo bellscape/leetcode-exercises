@@ -1,0 +1,61 @@
+package common;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+class TestRunner {
+
+  static Class<?> getMainClass() throws ReflectiveOperationException {
+    for (StackTraceElement elem : new Exception().getStackTrace()) {
+      String clazz = elem.getClassName();
+      if (!clazz.startsWith("common."))
+        return Class.forName(clazz);
+    }
+    throw new IllegalStateException("main class not found");
+  }
+
+  static Method getMainMethod(Class<?> clazz, Decoder<?>[] args) {
+    List<Method> methods = Arrays.stream(clazz.getDeclaredMethods())
+            .filter(method -> Modifier.isPublic(method.getModifiers()))
+            .filter(method -> !Modifier.isStatic(method.getModifiers()))
+            .filter(method -> !method.getReturnType().equals(void.class))
+            .filter(method -> args == null || args.length == 0 || method.getParameterCount() == args.length)
+            .collect(Collectors.toList());
+    if (methods.size() == 1) return methods.get(0);
+    if (methods.isEmpty()) throw new RuntimeException("method not found");
+    throw new RuntimeException("too many possible methods");
+  }
+
+  static Decoder<?>[] guessDecoders(Method method) {
+    Type[] types = method.getGenericParameterTypes();
+    int n = method.getParameterCount();
+
+    Decoder<?>[] out = new Decoder<?>[n];
+    for (int i = 0; i < n; i++)
+      out[i] = guessDecoder(types[i]);
+    return out;
+  }
+  private static Decoder<?> guessDecoder(Type clazz) {
+    switch (clazz.getTypeName()) {
+      case "int":
+        return Codec.integer;
+      case "java.lang.String":
+        return Codec.string;
+      case "int[]":
+        return Codec.intArr;
+      case "int[][]":
+        return Codec.intArrArr;
+      case "java.util.List<java.lang.Integer>":
+        return Codec.listInt;
+      case "java.util.List<java.util.List<java.lang.Integer>>":
+        return Codec.listListInt;
+      default:
+        throw new RuntimeException("unknown type for decoder: " + clazz.getTypeName());
+    }
+  }
+
+}
