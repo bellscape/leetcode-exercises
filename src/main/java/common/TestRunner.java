@@ -60,7 +60,7 @@ class TestRunner {
     }
   }
 
-  static void runTestCase(Object instance, Method method, Decoder<?>[] paramTypes, String fileLabel, TestCase[] testCases) throws Exception {
+  static void runTestCase(Object instance, Method method, Decoder<?>[] paramTypes, String fileLabel, List<TestCase> testCases) throws Exception {
     System.out.print(format(">> %s: ", fileLabel));
     for (TestCase test : testCases) {
       Object result = execTestCase(instance, method, paramTypes, test);
