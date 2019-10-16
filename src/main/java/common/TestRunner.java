@@ -7,9 +7,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
+
 class TestRunner {
 
-  static Class<?> getMainClass() throws ReflectiveOperationException {
+  static Class<?> getMainClass() throws Exception {
     for (StackTraceElement elem : new Exception().getStackTrace()) {
       String clazz = elem.getClassName();
       if (!clazz.startsWith("common."))
@@ -56,6 +58,39 @@ class TestRunner {
       default:
         throw new RuntimeException("unknown type for decoder: " + clazz.getTypeName());
     }
+  }
+
+  static void runTestCase(Object instance, Method method, Decoder<?>[] paramTypes, String fileLabel, TestCase[] testCases) throws Exception {
+    System.out.print(format(">> %s: ", fileLabel));
+    for (TestCase test : testCases) {
+      Object result = execTestCase(instance, method, paramTypes, test);
+
+      if (test.output == null) {
+        System.out.print(" . ");
+      } else {
+        String resultLiteral = Codec.encode(result);
+        if (test.output.equals(resultLiteral)) {
+          System.out.print(" √ ");
+        } else {
+          System.out.println();
+          System.err.println("input > " + test.inputDump);
+          System.err.println("return > " + resultLiteral);
+          System.err.println("expect > " + test.output);
+        }
+      }
+    }
+    System.out.println();
+  }
+  private static Object execTestCase(Object instance, Method method, Decoder<?>[] types, TestCase test) throws ReflectiveOperationException {
+    String[] args = test.argsLiterals;
+    if (args.length != types.length)
+      throw new IllegalArgumentException(format("literal length=%s, expect=%s", args.length, types.length));
+
+    Object[] argsObjs = new Object[types.length];
+    for (int i = 0; i < types.length; i++) {
+      argsObjs[i] = types[i].decode(args[i]);
+    }
+    return method.invoke(instance, argsObjs);
   }
 
 }
