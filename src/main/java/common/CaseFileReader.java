@@ -5,12 +5,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.lang.String.join;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 class CaseFileReader {
 
@@ -30,90 +32,147 @@ class CaseFileReader {
     return files;
   }
 
-  static List<TestCase> parseFile(File file) throws Exception {
+  static List<TestCase> parseFile(File file, int params) {
     String label = file.getName().toLowerCase().split("[-_.]+")[1];
     if (label.startsWith("example")) {
       return parseExampleFile(file);
     } else if (label.startsWith("wa")) {
       return parseWAFile(file);
     } else if (label.startsWith("tle")) {
-      return parseTLEFile(file);
+      return parseTLEFile(file, params);
     } else {
       System.err.println("unknown file type " + file.getName());
       return emptyList();
     }
   }
 
-  private static List<TestCase> parseExampleFile(File file) throws Exception {
+  private static List<TestCase> parseExampleFile(File file) {
     /* Input: arg, ...
        Output: output */
     List<TestCase> tests = new ArrayList<>();
 
-    String[] lastInput = new String[1];
-    forEachLine(file, line -> {
-
+    String input = null;
+    for (String line : readLines(file)) {
       Matcher inputMatcher = INPUT_PATTERN.matcher(line);
       if (inputMatcher.matches()) {
-        String input = line.substring(inputMatcher.group(1).length()).trim();
-
-        if (lastInput[0] != null)
-          System.err.println("duplicate input: " + lastInput[0]);
-        lastInput[0] = input;
-        return;
+        if (input != null)
+          System.err.println("duplicate input: " + input);
+        input = line.substring(inputMatcher.group(1).length()).trim();
+        continue;
       }
 
       Matcher outputMatcher = OUTPUT_PATTERN.matcher(line);
       if (outputMatcher.matches()) {
         String output = line.substring(outputMatcher.group(1).length()).trim();
-
-        if (lastInput[0] == null) {
+        if (input == null) {
           System.err.println("no input for output: " + output);
         } else {
-          String input = lastInput[0];
-          lastInput[0] = null;
           tests.add(parseSingleLineInput(input, output));
+          input = null;
         }
-        return;
+        continue;
       }
 
       // ignore
-    });
+    }
     return tests;
   }
   private static final Pattern INPUT_PATTERN = Pattern.compile("^((输入|Input)[：:]?\\s*).*");
   private static final Pattern OUTPUT_PATTERN = Pattern.compile("^((输出|Output)[：:]?\\s*).*");
+  private static final Pattern EXPECTED_PATTERN = Pattern.compile("^((预期|Expected)[：:]?\\s*).*");
   private static TestCase parseSingleLineInput(String input, String output) {
-    String[] argsExpressions = input.split(", ");
-    String[] argsLiterals = new String[argsExpressions.length];
-    for (int i = 0; i < argsExpressions.length; i++) {
-      String literal = argsExpressions[i].trim();
-      int idx = literal.indexOf("=");
-      if (idx > 0) literal = literal.substring(idx + 1).trim();
-      argsLiterals[i] = literal;
-    }
-
     TestCase test = new TestCase();
     test.inputDump = input;
-    test.argsLiterals = argsLiterals;
     test.output = output;
+    for (String expression : input.split(", ")) {
+      String literal = expression.trim();
+      int idx = literal.indexOf("=");
+      if (idx > 0) literal = literal.substring(idx + 1).trim();
+      test.argsLiterals.add(literal);
+    }
     return test;
   }
 
   private static List<TestCase> parseWAFile(File file) {
-    throw new UnsupportedOperationException();
-  }
-  private static List<TestCase> parseTLEFile(File file) {
-    throw new UnsupportedOperationException();
-  }
-
-  private static void forEachLine(File file, Consumer<String> f) throws Exception {
-    try (BufferedReader in = new BufferedReader(new FileReader(file))) {
-      String line;
-      while ((line = in.readLine()) != null) {
-        line = line.trim();
-        if (line.isEmpty()) continue;
-        f.accept(line);
+    /* Input: \n arg \n ...
+       Output: \n ...
+       Expected: \n output */
+    List<TestCase> tests = new ArrayList<>();
+    TestCase test = new TestCase();
+    String block = "none";
+    for (String line : readLines(file)) {
+      if (INPUT_PATTERN.matcher(line).matches()) {
+        block = "input";
+      } else if (OUTPUT_PATTERN.matcher(line).matches()) {
+        block = "output";
+      } else if (EXPECTED_PATTERN.matcher(line).matches()) {
+        block = "expected";
+      } else if ("input".equals(block)) {
+        test.argsLiterals.add(line);
+      } else if ("expected".equals(block)) {
+        test.output = line;
+        test.inputDump = join(", ", test.argsLiterals);
+        tests.add(test);
+        test = new TestCase();
       }
     }
+    return tests;
   }
+  private static List<TestCase> parseTLEFile(File file, int params) {
+    TestCase test = new TestCase();
+    for (String line : readLines(file)) {
+      if (test.argsLiterals.size() < params)
+        test.argsLiterals.add(line);
+    }
+    test.inputDump = join(", ", test.argsLiterals);
+    return singletonList(test);
+  }
+
+  private static Iterable<String> readLines(File file) {
+    return () -> new FileIterator(file);
+  }
+  private static class FileIterator implements Iterator<String> {
+    File file;
+    BufferedReader in;
+    String nextLine;
+    FileIterator(File file) {
+      this.file = file;
+      try {
+        this.in = new BufferedReader(new FileReader(file));
+      } catch (Exception e) { throw new IllegalArgumentException(e); }
+      readNextLine();
+    }
+    private void readNextLine() {
+      if (in != null) {
+        try {
+          while (true) {
+            nextLine = in.readLine();
+            if (nextLine == null) break;
+            if (!nextLine.trim().isEmpty()) break;  // skip empty line
+          }
+          if (nextLine == null) {
+            in.close();
+            in = null;
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
+          System.err.println("read file err: " + file);
+          nextLine = null;
+          in = null;
+        }
+      }
+    }
+
+    @Override
+    public boolean hasNext() {
+      return nextLine != null;
+    }
+    @Override
+    public String next() {
+      String out = nextLine;
+      readNextLine();
+      return out;
+    }
+  }
+
 }

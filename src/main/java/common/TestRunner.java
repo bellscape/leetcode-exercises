@@ -20,12 +20,11 @@ class TestRunner {
     throw new IllegalStateException("main class not found");
   }
 
-  static Method getMainMethod(Class<?> clazz, Decoder<?>[] args) {
+  static Method getMainMethod(Class<?> clazz) {
     List<Method> methods = Arrays.stream(clazz.getDeclaredMethods())
             .filter(method -> Modifier.isPublic(method.getModifiers()))
             .filter(method -> !Modifier.isStatic(method.getModifiers()))
             .filter(method -> !method.getReturnType().equals(void.class))
-            .filter(method -> args == null || args.length == 0 || method.getParameterCount() == args.length)
             .collect(Collectors.toList());
     if (methods.size() == 1) return methods.get(0);
     if (methods.isEmpty()) throw new RuntimeException("method not found");
@@ -82,13 +81,12 @@ class TestRunner {
     System.out.println();
   }
   private static Object execTestCase(Object instance, Method method, Decoder<?>[] types, TestCase test) throws ReflectiveOperationException {
-    String[] args = test.argsLiterals;
-    if (args.length != types.length)
-      throw new IllegalArgumentException(format("literal length=%s, expect=%s", args.length, types.length));
+    if (test.argsLiterals.size() != types.length)
+      throw new IllegalArgumentException(format("literal length=%s, expect=%s", test.argsLiterals.size(), types.length));
 
     Object[] argsObjs = new Object[types.length];
     for (int i = 0; i < types.length; i++) {
-      argsObjs[i] = types[i].decode(args[i]);
+      argsObjs[i] = types[i].decode(test.argsLiterals.get(i));
     }
     return method.invoke(instance, argsObjs);
   }
