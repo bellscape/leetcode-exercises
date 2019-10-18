@@ -31,63 +31,36 @@ class TestRunner {
     throw new RuntimeException("too many possible methods");
   }
 
-  static Decoder<?>[] guessDecoders(Method method) {
-    Type[] types = method.getGenericParameterTypes();
-    int n = method.getParameterCount();
-
-    Decoder<?>[] out = new Decoder<?>[n];
-    for (int i = 0; i < n; i++)
-      out[i] = guessDecoder(types[i]);
-    return out;
-  }
-  private static Decoder<?> guessDecoder(Type clazz) {
-    switch (clazz.getTypeName()) {
-      case "int":
-        return Codec.integer;
-      case "java.lang.String":
-        return Codec.string;
-      case "int[]":
-        return Codec.intArr;
-      case "int[][]":
-        return Codec.intArrArr;
-      case "java.util.List<java.lang.Integer>":
-        return Codec.listInt;
-      case "java.util.List<java.util.List<java.lang.Integer>>":
-        return Codec.listListInt;
-      default:
-        throw new RuntimeException("unknown type for decoder: " + clazz.getTypeName());
-    }
-  }
-
-  static void runTestCase(Object instance, Method method, Decoder<?>[] paramTypes, String fileLabel, List<TestCase> testCases) throws Exception {
+  static void runTestCase(Object instance, Method method, Judge judge, String fileLabel, List<TestCase> testCases) throws Exception {
     System.out.print(format(">> %s: ", fileLabel));
     for (TestCase test : testCases) {
-      Object result = execTestCase(instance, method, paramTypes, test);
+      Object result = execTestCase(instance, method, test);
 
       if (test.output == null) {
         System.out.print(" . ");
       } else {
-        String resultLiteral = Codec.encode(result);
-        if (test.output.equals(resultLiteral)) {
+        if (judge.matches(method.getGenericReturnType(), result, test.output)) {
           System.out.print(" √ ");
         } else {
           System.out.println();
           System.err.println("input > " + test.inputDump);
-          System.err.println("return > " + resultLiteral);
+          System.err.println("return > " + LiteralJudge.dump(result));
           System.err.println("expect > " + test.output);
         }
       }
     }
     System.out.println();
   }
-  private static Object execTestCase(Object instance, Method method, Decoder<?>[] types, TestCase test) throws ReflectiveOperationException {
+  private static Object execTestCase(Object instance, Method method, TestCase test) throws ReflectiveOperationException {
+    Type[] types = method.getGenericParameterTypes();
     if (test.argsLiterals.size() != types.length)
       throw new IllegalArgumentException(format("literal length=%s, expect=%s", test.argsLiterals.size(), types.length));
 
     Object[] argsObjs = new Object[types.length];
     for (int i = 0; i < types.length; i++) {
-      argsObjs[i] = types[i].decode(test.argsLiterals.get(i));
+      argsObjs[i] = Decoder.decode(types[i], test.argsLiterals.get(i));
     }
+
     return method.invoke(instance, argsObjs);
   }
 

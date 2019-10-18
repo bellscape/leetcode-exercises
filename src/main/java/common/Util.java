@@ -7,16 +7,18 @@ import java.util.List;
 public class Util {
 
   public static void runFiles() {
+    runFiles(LiteralJudge.instance);
+  }
+  public static void runFiles(Judge judge) {
     try {
       Class<?> clazz = TestRunner.getMainClass();
       Method method = TestRunner.getMainMethod(clazz);
-      Decoder<?>[] types = TestRunner.guessDecoders(method);
       Object instance = clazz.getDeclaredConstructor().newInstance();
 
       List<File> files = CaseFileReader.listAllTxtFiles(clazz);
       for (File file : files) {
-        List<TestCase> tests = CaseFileReader.parseFile(file, types.length);
-        TestRunner.runTestCase(instance, method, types, file.getName(), tests);
+        List<TestCase> tests = CaseFileReader.parseFile(file, method.getParameterCount());
+        TestRunner.runTestCase(instance, method, judge, file.getName(), tests);
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
