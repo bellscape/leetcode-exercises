@@ -14,7 +14,7 @@ import static java.lang.String.join;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
-class CaseFileReader {
+class TestCaseReader {
 
   static List<File> listAllTxtFiles(Class<?> main) {
     File path = new File("src/main/java/" + main.getPackage().getName().replace('.', '/'));

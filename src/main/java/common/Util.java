@@ -15,9 +15,9 @@ public class Util {
       Method method = TestRunner.getMainMethod(clazz);
       Object instance = clazz.getDeclaredConstructor().newInstance();
 
-      List<File> files = CaseFileReader.listAllTxtFiles(clazz);
+      List<File> files = TestCaseReader.listAllTxtFiles(clazz);
       for (File file : files) {
-        List<TestCase> tests = CaseFileReader.parseFile(file, method.getParameterCount());
+        List<TestCase> tests = TestCaseReader.parseFile(file, method.getParameterCount());
         TestRunner.runTestCase(instance, method, judge, file.getName(), tests);
       }
     } catch (Exception e) {

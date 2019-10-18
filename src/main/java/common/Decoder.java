@@ -9,8 +9,8 @@ import static java.util.Collections.emptyList;
 
 public class Decoder {
 
-  public static Object decode(Type clazz, String s) {
-    switch (clazz.getTypeName()) {
+  public static Object decode(Type type, String s) {
+    switch (type.getTypeName()) {
       case "int":
         return Integer.parseInt(s);
       case "java.lang.String":
@@ -24,7 +24,7 @@ public class Decoder {
       case "java.util.List<java.util.List<java.lang.Integer>>":
         return decodeListListInt(s);
       default:
-        throw new RuntimeException("unknown type for decoder: " + clazz.getTypeName());
+        throw new UnsupportedOperationException("unknown type for decoder: " + type.getTypeName());
     }
   }
 

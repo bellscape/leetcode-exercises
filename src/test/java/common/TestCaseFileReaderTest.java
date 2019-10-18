@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-public class CaseFileReaderTest {
+public class TestCaseFileReaderTest {
 
   @Test
   public void parseExampleFile() {
@@ -18,7 +18,7 @@ public class CaseFileReaderTest {
             "src/test/java/some/test/problem/p3-example-cn.txt"
     };
     for (String file : files) {
-      List<TestCase> tests = CaseFileReader.parseFile(new File(file), 1);
+      List<TestCase> tests = TestCaseReader.parseFile(new File(file), 1);
       assertThat(tests).hasSize(3);
 
       TestCase test_1 = tests.get(0);
@@ -38,7 +38,7 @@ public class CaseFileReaderTest {
   @Test
   public void parseWAFile() {
     String file = "src/test/java/some/test/problem/p3-wa.txt";
-    List<TestCase> tests = CaseFileReader.parseFile(new File(file), 1);
+    List<TestCase> tests = TestCaseReader.parseFile(new File(file), 1);
     assertThat(tests).hasSize(2);
 
     TestCase test_1 = tests.get(0);
@@ -53,7 +53,7 @@ public class CaseFileReaderTest {
   @Test
   public void parseTLEFile() {
     String file = "src/test/java/some/test/problem/p3-tle.txt";
-    List<TestCase> tests = CaseFileReader.parseFile(new File(file), 1);
+    List<TestCase> tests = TestCaseReader.parseFile(new File(file), 1);
     assertThat(tests).hasSize(1);
 
     TestCase test_1 = tests.get(0);
