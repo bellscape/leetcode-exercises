@@ -1,7 +1,5 @@
 
 /.idea/
-*.iml
+/*.iml
 
 /target/
-
-*.txt
