@@ -40,13 +40,12 @@ public class c159p4 {
     maxProfit.put(time[time.length - 1], 0);
 
     for (int i = time.length - 2; i >= 0; i--) {
-      int max = maxProfit.get(time[i + 1]); // rest
-      for (Job job : start2jobs.getOrDefault(time[i], Collections.emptyList())) {
-        int total = job.profit + maxProfit.get(job.end);
-        if (total > max)
-          max = total;
-      }
-      maxProfit.put(time[i], max);
+      int restTotal = maxProfit.get(time[i + 1]);
+      int workTotal = start2jobs.getOrDefault(time[i], Collections.emptyList())
+              .stream()
+              .mapToInt(job -> job.profit + maxProfit.get(job.end))
+              .max().orElse(restTotal);
+      maxProfit.put(time[i], Math.max(restTotal, workTotal));
     }
 
     return maxProfit.get(time[0]);
