@@ -11,6 +11,7 @@ public enum UnorderedJudge implements Judge {
   public boolean matches(Type type, Object output, String expect) {
     switch (type.getTypeName()) {
       case "java.util.List<java.util.List<java.lang.Integer>>":
+      case "java.util.List<java.lang.String>":
         Object expectList = Decoder.decode(type, expect);
         return listMatches((List<List<Integer>>) output, (List<List<Integer>>) expectList);
       default:

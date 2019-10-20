@@ -14,18 +14,26 @@ public class Decoder {
       case "int":
         return Integer.parseInt(s);
       case "java.lang.String":
-        return s.substring(1, s.length() - 1);
+        return decodeString(s);
       case "int[]":
         return decodeIntArr(s);
       case "int[][]":
         return decodeIntArrArr(s);
+      case "java.lang.String[]":
+        return decodeStringArr(s);
       case "java.util.List<java.lang.Integer>":
         return decodeListInt(s);
+      case "java.util.List<java.lang.String>":
+        return decodeListString(s);
       case "java.util.List<java.util.List<java.lang.Integer>>":
         return decodeListListInt(s);
       default:
         throw new UnsupportedOperationException("unknown type for decoder: " + type.getTypeName());
     }
+  }
+
+  private static String decodeString(String s) {
+    return s.substring(1, s.length() - 1);
   }
 
   private static int[] decodeIntArr(String input) {
@@ -34,22 +42,34 @@ public class Decoder {
             .mapToInt(Integer::parseInt)
             .toArray();
   }
-  private static int[][] decodeIntArrArr(String input) {
-    if (input.equals("[]")) return new int[0][];
-    return Arrays.stream(input.split("],\\["))
-            .map(s -> decodeIntArr(s))
-            .toArray(int[][]::new);
-  }
   static List<Integer> decodeListInt(String input) {
     return Arrays.stream(input.split("[^-\\d]+"))
             .filter(s -> !s.isEmpty())
             .map(Integer::parseInt)
             .collect(Collectors.toList());
   }
+
+  private static int[][] decodeIntArrArr(String input) {
+    if (input.equals("[]")) return new int[0][];
+    return Arrays.stream(input.split("],\\["))
+            .map(Decoder::decodeIntArr)
+            .toArray(int[][]::new);
+  }
   static List<List<Integer>> decodeListListInt(String input) {
     if ("[]".equals(input)) return emptyList();
     return Arrays.stream(input.split("],\\["))
-            .map(s -> decodeListInt(s))
+            .map(Decoder::decodeListInt)
+            .collect(Collectors.toList());
+  }
+
+  private static String[] decodeStringArr(String input) {
+    return Arrays.stream(input.substring(1, input.length() - 1).split(","))
+            .map(Decoder::decodeString)
+            .toArray(String[]::new);
+  }
+  private static List<String> decodeListString(String input) {
+    return Arrays.stream(input.substring(1, input.length() - 1).split(","))
+            .map(Decoder::decodeString)
             .collect(Collectors.toList());
   }
 
