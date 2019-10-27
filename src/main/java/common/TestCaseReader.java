@@ -38,7 +38,7 @@ class TestCaseReader {
       return parseExampleFile(file);
     } else if (label.startsWith("wa")) {
       return parseWAFile(file);
-    } else if (label.startsWith("tle")) {
+    } else if (label.startsWith("tle") || label.startsWith("err")) {
       return parseTLEFile(file, params);
     } else {
       System.err.println("unknown file type " + file.getName());
@@ -71,6 +71,11 @@ class TestCaseReader {
           input = null;
         }
         continue;
+      }
+
+      // additional input lines
+      if (line.matches("^\\s.*") && input != null && input.endsWith(",")) {
+        input += line.trim();
       }
 
       // ignore
