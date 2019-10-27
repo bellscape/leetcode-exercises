@@ -32,7 +32,7 @@ public class c160p4 {
       return;
     }
 
-    if (curBlocks + 1 >= minBlocks) return;
+    if (curBlocks + predictMinBlocksNeeded() >= minBlocks) return;
     int firstRow = getNextBlockFirstRow();
     for (int size = n; size >= 1; size--) {
       if (!canUseBlock(firstRow, size)) continue;
@@ -43,7 +43,6 @@ public class c160p4 {
     }
   }
 
-  // 下块地砖起始位置
   private int getNextBlockFirstRow() {
     int maxI = 0;
     int maxLeft = rowLefts[0];
@@ -56,30 +55,38 @@ public class c160p4 {
     }
     return maxI;
   }
-  private boolean canUseBlock(int startRow, int size) {
+  private int predictMinBlocksNeeded() {
+    int needs = rowLefts[0] > 0 ? 1 : 0;
+    for (int i = 1; i < rowLefts.length; i++) {
+      if (rowLefts[i - 1] != rowLefts[i] && rowLefts[i] > 0)
+        needs++;
+    }
+    return needs;
+  }
+  private boolean canUseBlock(int firstRow, int size) {
     // out of range
-    if (startRow + size > n) return false;
+    if (firstRow + size > n) return false;
 
     // not enough space
-    int left = rowLefts[startRow];
+    int left = rowLefts[firstRow];
     if (left < size) return false;
 
-    for (int row = startRow + 1; row < startRow + size; row++) {
+    for (int row = firstRow + 1; row < firstRow + size; row++) {
       if (rowLefts[row] != left) return false;
     }
 
     return true;
   }
-  private void useBlock(int startRow, int size) {
+  private void useBlock(int firstRow, int size) {
     curBlocks++;
-    for (int row = startRow; row < startRow + size; row++) {
+    for (int row = firstRow; row < firstRow + size; row++) {
       rowLefts[row] -= size;
     }
     totalLeft -= size * size;
   }
-  private void reverseBlock(int startRow, int size) {
+  private void reverseBlock(int firstRow, int size) {
     curBlocks--;
-    for (int row = startRow; row < startRow + size; row++) {
+    for (int row = firstRow; row < firstRow + size; row++) {
       rowLefts[row] += size;
     }
     totalLeft += size * size;

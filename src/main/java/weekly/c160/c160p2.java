@@ -9,8 +9,8 @@ public class c160p2 {
   public List<Integer> circularPermutation(int n, int start) {
     out.clear();
     out.add(start);
-    for (int digit : generateOp(n)) {
-      start ^= (int) Math.pow(2, digit);
+    for (int pos : generateOp(n)) {
+      start ^= 1 << pos;
       out.add(start);
     }
     return out;

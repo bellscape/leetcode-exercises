@@ -10,7 +10,6 @@ import java.util.Set;
 public class c160p3 {
 
   public int maxLength(List<String> arr) {
-    this.arr = arr;
     this.arrChars.clear();
     for (int i = 0; i < arr.size(); i++) {
       Set<Character> chars = new HashSet<>();
@@ -28,16 +27,15 @@ public class c160p3 {
     maxLength = 0;
     chars.clear();
 
-    test(0);
+    explore(0);
     return maxLength;
   }
-  private List<String> arr;
   private List<Set<Character>> arrChars = new ArrayList<>();
   private int leftLength;
   private int maxLength;
   private final Set<Character> chars = new HashSet<>();
 
-  private void test(int pos) {
+  private void explore(int pos) {
     // out of range
     if (pos >= arrChars.size()) return;
     // no hope
@@ -51,11 +49,11 @@ public class c160p3 {
       chars.addAll(s);
       maxLength = Math.max(maxLength, chars.size());
 
-      test(pos + 1);
+      explore(pos + 1);
       chars.removeAll(s);
     }
 
-    test(pos + 1);
+    explore(pos + 1);
 
     leftLength += s.size();
   }
