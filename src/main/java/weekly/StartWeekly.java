@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 
 import static java.lang.String.format;
 
@@ -12,6 +13,9 @@ public class StartWeekly {
   public static void start(int c) throws Exception {
     // create package dir
     String path = format("src/main/java/weekly/c%s", c);
+    if (new File(path).isDirectory())
+      throw new IllegalStateException("path exists: " + path);
+
     new File(path).mkdirs();
     for (int p = 1; p <= 4; p++) {
       // create class file
@@ -30,7 +34,10 @@ public class StartWeekly {
   }
 
   public static void main(String[] args) throws Exception {
-    start(Integer.parseInt(args[0]));
+    Scanner scanner = new Scanner(System.in);
+    System.out.println("week> ");
+    int week = scanner.nextInt();
+    start(week);
   }
 
 }
