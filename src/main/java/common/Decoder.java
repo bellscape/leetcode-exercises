@@ -21,6 +21,8 @@ public class Decoder {
         return decodeIntArrArr(s);
       case "char[]":
         return decodeCharArr(s);
+      case "char[][]":
+        return decodeCharArrArr(s);
       case "java.lang.String[]":
         return decodeStringArr(s);
       case "java.util.List<java.lang.Integer>":
@@ -52,7 +54,7 @@ public class Decoder {
   }
 
   private static int[][] decodeIntArrArr(String input) {
-    if (input.equals("[]")) return new int[0][];
+    if ("[]".equals(input)) return new int[0][];
     return Arrays.stream(input.split("],\\["))
             .map(Decoder::decodeIntArr)
             .toArray(int[][]::new);
@@ -71,6 +73,12 @@ public class Decoder {
       chars[i] = charStrings[i].charAt(0);
     }
     return chars;
+  }
+  private static char[][] decodeCharArrArr(String input) {
+    if ("[]".equals(input)) return new char[0][];
+    return Arrays.stream(input.substring(2, input.length() - 2).split("],\\["))
+            .map(s -> decodeCharArr("[" + s + "]"))
+            .toArray(char[][]::new);
   }
 
   private static String[] decodeStringArr(String input) {
