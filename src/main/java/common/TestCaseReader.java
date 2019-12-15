@@ -52,12 +52,20 @@ class TestCaseReader {
     List<TestCase> tests = new ArrayList<>();
 
     String input = null;
+    boolean inputNotFinished = false;
     for (String line : readLines(file)) {
+      if (inputNotFinished) {
+        input += line.trim();
+        inputNotFinished = notFinished(input);
+        continue;
+      }
+
       Matcher inputMatcher = INPUT_PATTERN.matcher(line);
       if (inputMatcher.matches()) {
         if (input != null)
           System.err.println("duplicate input: " + input);
         input = line.substring(inputMatcher.group(1).length()).trim();
+        if (input.isEmpty() || notFinished(input)) inputNotFinished = true;
         continue;
       }
 
@@ -82,6 +90,10 @@ class TestCaseReader {
     }
     return tests;
   }
+  private static boolean notFinished(String trimmedLine) {
+    return trimmedLine.endsWith(",") || trimmedLine.endsWith("=");
+  }
+
   private static final Pattern INPUT_PATTERN = Pattern.compile("^((输入|Input)[：:]?\\s*).*");
   private static final Pattern OUTPUT_PATTERN = Pattern.compile("^((输出|Output)[：:]?\\s*).*");
   private static final Pattern EXPECTED_PATTERN = Pattern.compile("^((预期|Expected)[：:]?\\s*).*");
@@ -89,7 +101,7 @@ class TestCaseReader {
     TestCase test = new TestCase();
     test.inputDump = input;
     test.output = output;
-    for (String expression : input.split(", ")) {
+    for (String expression : input.split(",\\s*(?=[a-z])")) {
       String literal = expression.trim();
       int idx = literal.indexOf("=");
       if (idx > 0) literal = literal.substring(idx + 1).trim();
