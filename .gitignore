@@ -5,3 +5,4 @@
 /target/
 
 *.txt
+*fail*.java
