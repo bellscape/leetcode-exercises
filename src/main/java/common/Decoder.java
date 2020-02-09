@@ -55,13 +55,13 @@ public class Decoder {
 
   private static int[][] decodeIntArrArr(String input) {
     if ("[]".equals(input)) return new int[0][];
-    return Arrays.stream(input.split("],\\["))
+    return Arrays.stream(input.split("],[\u00A0\\s]*\\["))
             .map(Decoder::decodeIntArr)
             .toArray(int[][]::new);
   }
   static List<List<Integer>> decodeListListInt(String input) {
     if ("[]".equals(input)) return emptyList();
-    return Arrays.stream(input.split("],\\["))
+    return Arrays.stream(input.split("],[\u00A0\\s]*\\["))
             .map(Decoder::decodeListInt)
             .collect(Collectors.toList());
   }
@@ -76,7 +76,7 @@ public class Decoder {
   }
   private static char[][] decodeCharArrArr(String input) {
     if ("[]".equals(input)) return new char[0][];
-    return Arrays.stream(input.substring(2, input.length() - 2).split("],\\["))
+    return Arrays.stream(input.substring(2, input.length() - 2).split("],[\u00A0\\s]*\\["))
             .map(s -> decodeCharArr("[" + s + "]"))
             .toArray(char[][]::new);
   }
