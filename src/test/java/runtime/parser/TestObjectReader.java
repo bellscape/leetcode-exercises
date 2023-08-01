@@ -13,13 +13,13 @@ public class TestObjectReader {
 				.isEqualTo(new int[]{2, 7, 11, 15});
 		assertThat(input.read_param(int.class))
 				.isEqualTo(9);
-		assertThat(input.is_eof())
+		assertThat(input.eof())
 				.isTrue();
 
 		ObjectReader output = new ObjectReader("[0,1]");
 		assertThat(output.read_return(int[].class))
 				.isEqualTo(new int[]{0, 1});
-		assertThat(output.is_eof())
+		assertThat(output.eof())
 				.isTrue();
 	}
 

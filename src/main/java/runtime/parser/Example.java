@@ -9,15 +9,17 @@ import org.jsoup.nodes.TextNode;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExampleParser {
+public record Example(String input, String output) {
 
-	public record Example(String input, String output) { }
-
-	public static List<Example> parse(String content) {
+	public static List<Example> parse_html(String content) {
 		List<Example> out = new ArrayList<>();
 		Document doc = Jsoup.parseBodyFragment(content);
 		for (Element pre : doc.select("pre")) {
-			if (!has_title(pre)) continue;
+
+			// check: <p>Example 1:</p>
+			Element previous_p = pre.previousElementSibling();
+			boolean title_ok = previous_p != null && previous_p.text().startsWith("Example ");
+			Preconditions.checkState(title_ok);
 
 			String[] lines = pre.childNodes().stream().map(node -> {
 				if (node instanceof TextNode text) {
@@ -28,6 +30,9 @@ public class ExampleParser {
 					return "";
 				}
 			}).toArray(String[]::new);
+
+			// <strong>Input:</strong>
+			// <strong>Output:</strong>
 
 			int cursor = 0;
 			Preconditions.checkState(lines[cursor].equals("s/Input:"));
@@ -45,12 +50,7 @@ public class ExampleParser {
 
 			out.add(new Example(input, output));
 		}
-
 		return out;
-	}
-	private static boolean has_title(Element pre) {
-		Element previous = pre.previousElementSibling();
-		return previous != null && previous.text().startsWith("Example ");
 	}
 
 }

@@ -53,7 +53,7 @@ public class TestExampleParser {
 				<p>&nbsp;</p>
 				<strong>Follow-up:&nbsp;</strong>Can you come up with an algorithm that is less than&nbsp;<code>O(n<sup>2</sup>)&nbsp;</code>time complexity?""";
 
-		List<ExampleParser.Example> examples = ExampleParser.parse(content);
+		List<Example> examples = Example.parse_html(content);
 		assertThat(examples).hasSize(3);
 		assertThat(examples.get(0).input()).isEqualTo("nums = [2,7,11,15], target = 9");
 		assertThat(examples.get(0).output()).isEqualTo("[0,1]");

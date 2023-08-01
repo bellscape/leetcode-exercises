@@ -16,11 +16,11 @@ public class ObjectReader {
 	private int cursor = 0;
 	public ObjectReader(String raw) { this.raw = raw; }
 
-	public boolean is_eof() { return cursor >= raw.length(); }
+	public boolean eof() { return cursor >= raw.length(); }
 	public char peak() { return raw.charAt(cursor); }
 
-	public Object read_param(Type type) {
-		Preconditions.checkState(!is_eof());
+	public Object read_param(Class<?> type) {
+		Preconditions.checkState(!eof());
 
 		// skip "name = "
 		if (Character.isJavaIdentifierStart(peak())) {
@@ -33,7 +33,7 @@ public class ObjectReader {
 		Object out = read_object(type);
 
 		// skip ", "
-		if (!is_eof()) {
+		if (!eof()) {
 			drop_while(Character::isWhitespace);
 			drop(",");
 			drop_while(Character::isWhitespace);
@@ -43,13 +43,13 @@ public class ObjectReader {
 	}
 	private static final Pattern PARAM_NAME = Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*");
 
-	public Object read_return(Type type) {
+	public Object read_return(Class<?> type) {
 		Object out = read_object(type);
-		Preconditions.checkState(is_eof());
+		Preconditions.checkState(eof());
 		return out;
 	}
 
-	private Object read_object(Type type) {
+	private Object read_object(Class<?> type) {
 		return switch (type.getTypeName()) {
 			case "int" -> Integer.parseInt(take(INT));
 			case "int[]" -> read_array(int.class);
@@ -89,7 +89,7 @@ public class ObjectReader {
 		cursor = m.end();
 	}
 	private void drop_while(Predicate<Character> f) {
-		while (!is_eof() && f.test(peak()))
+		while (!eof() && f.test(peak()))
 			cursor++;
 	}
 	private void drop(String prefix) {
