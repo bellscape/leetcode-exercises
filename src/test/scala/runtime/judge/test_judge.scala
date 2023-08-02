@@ -3,12 +3,12 @@ package runtime.judge
 import org.scalatest.funsuite.AnyFunSuite
 import runtime.parser.Example
 
-class TestJudge extends AnyFunSuite {
+class test_judge extends AnyFunSuite {
 
 	def sample_add(a: Int, b: Int): Int = a + b
 
 	test("sample") {
-		val method = classOf[TestJudge].getDeclaredMethod("sample_add", classOf[Int], classOf[Int])
+		val method = classOf[test_judge].getDeclaredMethod("sample_add", classOf[Int], classOf[Int])
 		val example_1 = Example("1,2", "3") // ok
 		val example_2 = Example("1,2", "4") // wrong answer
 
