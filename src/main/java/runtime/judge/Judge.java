@@ -1,7 +1,6 @@
 package runtime.judge;
 
 import com.google.common.base.Preconditions;
-import lombok.SneakyThrows;
 import runtime.parser.Example;
 import runtime.parser.ObjectReader;
 
@@ -20,7 +19,7 @@ public class Judge {
 
 	public record Result(long cost, boolean wrong_answer, String expect_output, String actual_output) {
 		public boolean time_limit_exceeded() { return cost > 5_000; }
-		public boolean pass() { return !wrong_answer && !time_limit_exceeded(); }
+		public boolean ok() { return !wrong_answer && !time_limit_exceeded(); }
 	}
 
 	public static List<Result> run(Method method, List<Example> examples) {
@@ -37,7 +36,6 @@ public class Judge {
 		return out;
 	}
 
-	@SneakyThrows
 	private static Object call(Method method, String input) {
 		// parse args
 		ObjectReader args_reader = new ObjectReader(input);
@@ -47,8 +45,12 @@ public class Judge {
 		Preconditions.checkState(args_reader.eof());
 
 		// call
-		Object instance = method.getDeclaringClass().getDeclaredConstructor().newInstance();
-		return method.invoke(instance, args);
+		try {
+			Object instance = method.getDeclaringClass().getDeclaredConstructor().newInstance();
+			return method.invoke(instance, args);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private static Result compare_result(Method method, String output, Object returned, long cost) {

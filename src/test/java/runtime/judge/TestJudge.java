@@ -20,8 +20,8 @@ public class TestJudge {
 
 		List<Judge.Result> results = Judge.run(method, List.of(example_1, example_2));
 		assertThat(results).hasSize(2);
-		assertThat(results.get(0).pass()).isTrue();
-		assertThat(results.get(1).pass()).isFalse();
+		assertThat(results.get(0).ok()).isTrue();
+		assertThat(results.get(1).ok()).isFalse();
 	}
 
 }
