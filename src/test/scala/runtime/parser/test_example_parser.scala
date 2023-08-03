@@ -48,7 +48,7 @@ class test_example_parser extends AnyFunSuite {
 <p>&nbsp;</p>
 <strong>Follow-up:&nbsp;</strong>Can you come up with an algorithm that is less than&nbsp;<code>O(n<sup>2</sup>)&nbsp;</code>time complexity?"""
 
-		val examples = Examples.parse_html(html)
+		val examples = ExampleParser.parse_html(html)
 		assert(examples.size === 3)
 		assert(examples(0).input === "nums = [2,7,11,15], target = 9")
 		assert(examples(0).output === "[0,1]")

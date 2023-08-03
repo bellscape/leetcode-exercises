@@ -96,7 +96,9 @@ case class QuestionFullNode
 	jsonExampleTestcases: String,
 	__typename: String
 ) {
-	def java_code_snippet: String = codeSnippets.filter(_.langSlug == "java").head.code
+	def id: Int = questionFrontendId.toInt
+	def title_slug: String = titleSlug
+	def scala_code: String = codeSnippets.filter(_.langSlug == "scala").head.code
 }
 
 case class CodeSnippetNode

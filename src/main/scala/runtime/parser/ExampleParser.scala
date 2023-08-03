@@ -7,7 +7,7 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 case class Example(input: String, output: String)
 
-object Examples {
+object ExampleParser {
 	def parse_html(html: String): Seq[Example] = {
 		val doc = Jsoup.parseBodyFragment(html)
 		val pres = doc.select("pre")
