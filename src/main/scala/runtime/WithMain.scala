@@ -5,13 +5,17 @@ import runtime.judge.Judge
 import runtime.parser.ExampleParser
 import runtime.repo.QuestionFullNode
 
+import java.awt.Toolkit
+import java.awt.datatransfer.StringSelection
 import java.lang.reflect.Modifier
+import java.nio.file.{Files, Paths}
 
 trait WithMain {
 
 	def main(args: Array[String]): Unit = {
 		val q = CodeStyle.get_question(getClass)
 		run_test_cases(q)
+		prepare_submit(q)
 	}
 
 	private def run_test_cases(q: QuestionFullNode): Unit = {
@@ -28,14 +32,30 @@ trait WithMain {
 			val result = Judge.run(this, method, example)
 
 			val icon = if (result.ok) "✔" else "✘"
+			val title = s"Example ${i + 1}"
+			val cost = s"cost ${result.cost} ms"
 			val suffix = if (result.wrong_answer) {
 				s"""   // output mismatch
-				   |\t\tinput:  ${example.input}
-				   |\t\texpect: ${example.output}
-				   |\t\tactual: ${result.actual_output}""".stripMargin
+				   |\t input:  ${example.input}
+				   |\t expect: ${example.output}
+				   |\t actual: ${result.actual_output}""".stripMargin
 			} else if (result.time_limit_exceeded) "   // timeout" else ""
-			println(s"$icon Example ${i + 1}: cost ${result.cost} ms$suffix")
+			println(s"$icon $title: $cost$suffix")
 		}
+	}
+
+	private def prepare_submit(q: QuestionFullNode): Unit = {
+		val file = Paths.get("src/main/scala",
+			getClass.getPackageName.replace('.', '/'),
+			s"${getClass.getSimpleName.replace("$", "")}.scala"
+		)
+		val code = Files.readString(file)
+		val submit_code = CodeStyle.generate_submit_code(code, q)
+
+		// copy to clipboard
+		val clipboard = Toolkit.getDefaultToolkit.getSystemClipboard
+		clipboard.setContents(new StringSelection(submit_code), null)
+		println(s"Copied to clipboard: submit p${q.questionFrontendId}")
 	}
 
 }

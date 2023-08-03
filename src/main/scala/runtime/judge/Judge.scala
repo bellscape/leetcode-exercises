@@ -28,13 +28,18 @@ object Judge {
 		method.invoke(instance, args: _*)
 	}
 
-	private def compare_result(method: Method, expect: String, actual: Any, cost: Long): JudgeResult = {
-		val expect_obj = new ObjectReader(expect).read_return(method.getReturnType)
-		val wrong_answer = expect_obj != actual
-		if (wrong_answer) {
-			JudgeResult(cost, wrong_answer, expect, format_obj(actual))
+	private def compare_result(method: Method, expect_str: String, actual: Any, cost: Long): JudgeResult = {
+		val expect = new ObjectReader(expect_str).read_return(method.getReturnType)
+		val wrong_answer = !is_equal(expect, actual)
+		JudgeResult(cost, wrong_answer, expect_str, format_obj(actual))
+	}
+	private def is_equal(a: Any, b: Any): Boolean = {
+		if (a.getClass.isArray) {
+			b.getClass.isArray && a.asInstanceOf[Array[_]].zip(b.asInstanceOf[Array[_]]).forall { case (a, b) =>
+				is_equal(a, b)
+			}
 		} else {
-			JudgeResult(cost, wrong_answer, expect, expect)
+			a == b
 		}
 	}
 	private def format_obj(obj: Any): String = {

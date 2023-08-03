@@ -2,7 +2,7 @@ package runtime.code
 
 import runtime.repo.{LeetCodeRepo, QuestionFullNode}
 
-import java.nio.file.Path
+import java.nio.file.{Path, Paths}
 
 object CodeStyle {
 
@@ -10,9 +10,9 @@ object CodeStyle {
 	private def class_name(id: Int, title_slug: String): String = s"p${id}_${title_slug.replace('-', '_')}"
 
 	def code_file(id: Int, title_slug: String): Path = {
-		Path.of("src/main/scala")
-			.resolve(package_name(id).replace('.', '/'))
-			.resolve(s"${class_name(id, title_slug)}.scala")
+		Paths.get("src/main/scala",
+			package_name(id).replace('.', '/'),
+			s"${class_name(id, title_slug)}.scala")
 	}
 
 	def get_question(clazz: Class[?]): QuestionFullNode = {
@@ -24,7 +24,7 @@ object CodeStyle {
 	}
 
 	def code_stub(q: QuestionFullNode): String = {
-		val code = q.scala_code
+		val code = q.scala_code.trim
 		assert(code.startsWith("object Solution {"))
 
 		val prefix =
@@ -32,10 +32,17 @@ object CodeStyle {
 			   |
 			   |import runtime.WithMain
 			   |
-			   |// ${q.translatedTitle}
 			   |object ${class_name(q.id, q.title_slug)} extends WithMain {""".stripMargin
 
-		code.replaceFirst("""^object Solution \{""", prefix)
+		code.replaceFirst("""^object Solution \{""", prefix) + "\n"
+	}
+
+	def generate_submit_code(code: String, q: QuestionFullNode): String = {
+		code
+			.replaceFirst("""\nobject \w+ extends WithMain \{\n""", "\nobject Solution {\n")
+			.replaceAll("\nimport runtime\\..*?\n", "\n")
+			.replaceFirst("""^package [\w.]+\n""", "")
+			.trim + "\n"
 	}
 
 }
