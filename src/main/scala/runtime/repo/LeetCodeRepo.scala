@@ -34,7 +34,7 @@ object LeetCodeRepo {
 		val question = root.get("data").get("question")
 		mapper.readerFor(classOf[QuestionFullNode]).readValue(question)
 	}
-	private val mapper: ObjectMapper = new ObjectMapper()
+	private[repo] val mapper: ObjectMapper = new ObjectMapper()
 		.registerModule(DefaultScalaModule)
 }
 
@@ -99,6 +99,9 @@ case class QuestionFullNode
 	def id: Int = questionFrontendId.toInt
 	def title_slug: String = titleSlug
 	def scala_code: String = codeSnippets.filter(_.langSlug == "scala").head.code
+	lazy val parsed_meta_data: MetaDataNode = {
+		LeetCodeRepo.mapper.readerFor(classOf[MetaDataNode]).readValue(metaData)
+	}
 }
 
 case class CodeSnippetNode
@@ -108,4 +111,6 @@ case class CodeSnippetNode
 	code: String,
 	__typename: String
 )
-
+case class MetaDataNode(name: String, params: Array[MetaDataParamNode], `return`: MetaDataReturnNode, manual: Boolean)
+case class MetaDataParamNode(name: String, `type`: String)
+case class MetaDataReturnNode(`type`: String, size: Int = 0)

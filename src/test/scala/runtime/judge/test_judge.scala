@@ -11,13 +11,14 @@ class test_judge extends AnyFunSuite {
 
 	test("sample") {
 		val method = Sample.getClass.getDeclaredMethod("sample_add", classOf[Int], classOf[Int])
-		val example_1 = Example("1,2", "3") // ok
-		val example_2 = Example("1,2", "4") // wrong answer
 
-		val results = Judge.run(Sample, method, Seq(example_1, example_2))
-		assert(results.size == 2)
-		assert(results(0).ok)
-		assert(!results(1).ok)
+		val example_1 = Example("1,2", "3") // ok
+		val result_1 = Judge.run(Sample, method, example_1)
+		assert(result_1.ok)
+
+		val example_2 = Example("1,2", "4") // wrong answer
+		val result_2 = Judge.run(Sample, method, example_2)
+		assert(!result_2.ok)
 	}
 
 }

@@ -11,16 +11,14 @@ case class JudgeResult(cost: Long, wrong_answer: Boolean, expect_output: String,
 
 object Judge {
 
-	def run(instance: Any, method: Method, examples: Seq[Example]): Seq[JudgeResult] = {
+	def run(instance: Any, method: Method, example: Example): JudgeResult = {
 		assert(!Modifier.isStatic(method.getModifiers))
 		assert(Modifier.isPublic(method.getModifiers))
 
-		examples.map(example => {
-			val start = System.currentTimeMillis()
-			val returned = call(instance, method, example.input)
-			val cost = System.currentTimeMillis() - start
-			compare_result(method, example.output, returned, cost)
-		})
+		val start = System.currentTimeMillis()
+		val returned = call(instance, method, example.input)
+		val cost = System.currentTimeMillis() - start
+		compare_result(method, example.output, returned, cost)
 	}
 
 	private def call(instance: Any, method: Method, input: String): Any = {
