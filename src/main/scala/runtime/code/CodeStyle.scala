@@ -25,16 +25,22 @@ object CodeStyle {
 
 	def code_stub(q: QuestionFullNode): String = {
 		val code = q.scala_code.trim
-		assert(code.startsWith("object Solution {"))
 
-		val prefix =
-			s"""package ${package_name(q.id)}
-			   |
-			   |import runtime.WithMain
-			   |
-			   |object ${class_name(q.id, q.title_slug)} extends WithMain {""".stripMargin
+		val out = new StringBuilder()
+		out ++= s"package ${package_name(q.id)}\n\n"
+		if (code.contains(" class ListNode(")) {
+			out ++= "import runtime.{ListNode, WithMain}\n\n"
+		} else {
+			out ++= "import runtime.WithMain\n\n"
+		}
+		out ++= s"object ${class_name(q.id, q.title_slug)} extends WithMain "
 
-		code.replaceFirst("""^object Solution \{""", prefix) + "\n"
+		val hint = "object Solution "
+		val i = code.indexOf(hint)
+		assert(i >= 0)
+		out ++= code.substring(i + hint.length).trim
+		out ++= "\n"
+		out.toString()
 	}
 
 	def generate_submit_code(code: String, q: QuestionFullNode): String = {

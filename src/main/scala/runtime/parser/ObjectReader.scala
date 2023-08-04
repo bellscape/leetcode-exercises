@@ -1,5 +1,6 @@
 package runtime.parser
 
+import runtime.ListNode
 import runtime.parser.ObjectReader.{INT, PARAM_NAME}
 
 import scala.collection.mutable.ArrayBuffer
@@ -72,6 +73,7 @@ class ObjectReader(raw: String) {
 
 		clazz.getTypeName match {
 			case "int" => take(INT).toInt
+			case "runtime.ListNode" => read_list_node()
 			case t => throw new UnsupportedOperationException(s"unsupported type: $t")
 		}
 	}
@@ -97,6 +99,18 @@ class ObjectReader(raw: String) {
 			java.lang.reflect.Array.set(array, i, elem)
 		}
 		array
+	}
+
+	private def read_list_node(): ListNode = {
+		val array = read_array(classOf[Int]).asInstanceOf[Array[Int]]
+		assert(array.nonEmpty)
+		val dummy = new ListNode()
+		var cur = dummy
+		for (elem <- array) {
+			cur.next = new ListNode(elem)
+			cur = cur.next
+		}
+		dummy.next
 	}
 
 }

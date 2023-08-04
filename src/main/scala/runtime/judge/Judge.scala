@@ -1,8 +1,10 @@
 package runtime.judge
 
+import runtime.ListNode
 import runtime.parser.{Example, ObjectReader}
 
 import java.lang.reflect.{Method, Modifier}
+import scala.collection.mutable.ArrayBuffer
 
 case class JudgeResult(cost: Long, wrong_answer: Boolean, expect_output: String, actual_output: String) {
 	def time_limit_exceeded: Boolean = cost > 5_000
@@ -38,13 +40,30 @@ object Judge {
 			b.getClass.isArray && a.asInstanceOf[Array[_]].zip(b.asInstanceOf[Array[_]]).forall { case (a, b) =>
 				is_equal(a, b)
 			}
+		} else if (a.isInstanceOf[ListNode]) {
+			b.isInstanceOf[ListNode] && is_list_node_equal(a.asInstanceOf[ListNode], b.asInstanceOf[ListNode])
 		} else {
 			a == b
 		}
 	}
+	private def is_list_node_equal(a: ListNode, b: ListNode): Boolean = {
+		if (a == null && b == null) return true
+		if (a == null || b == null) return false
+		if (a.x != b.x) return false
+		is_list_node_equal(a.next, b.next)
+	}
 	private def format_obj(obj: Any): String = {
 		obj match {
 			case arr: Array[_] => arr.map(format_obj).mkString("[", ",", "]")
+			case list: ListNode => {
+				val out = ArrayBuffer.empty[Int]
+				var cur = list
+				while (cur != null) {
+					out += cur.x
+					cur = cur.next
+				}
+				out.mkString("[", ",", "]")
+			}
 			case _ => obj.toString
 		}
 	}

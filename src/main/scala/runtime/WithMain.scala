@@ -27,12 +27,12 @@ trait WithMain {
 			.filter(m => Modifier.isPublic(m.getModifiers))
 			.head
 
-		val examples = ExampleParser.parse_html(q.content)
-		for ((example, i) <- examples.zipWithIndex) {
+		val examples_1 = ExampleParser.parse_html(q.content)
+		val examples_2 = ExampleParser.parse_files(getClass)
+		for (example <- examples_1 ++ examples_2) {
 			val result = Judge.run(this, method, example)
 
 			val icon = if (result.ok) "✔" else "✘"
-			val title = s"Example ${i + 1}"
 			val cost = s"cost ${result.cost} ms"
 			val suffix = if (result.wrong_answer) {
 				s"""   // output mismatch
@@ -40,7 +40,7 @@ trait WithMain {
 				   |\t expect: ${example.output}
 				   |\t actual: ${result.actual_output}""".stripMargin
 			} else if (result.time_limit_exceeded) "   // timeout" else ""
-			println(s"$icon $title: $cost$suffix")
+			println(s"$icon ${example.label}: $cost$suffix")
 		}
 	}
 
