@@ -6,7 +6,7 @@ import org.jsoup.nodes.{Element, TextNode}
 import java.nio.file.{Files, Paths}
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-case class Example(label: String, input: String, output: String)
+case class Example(label: String, input: String, output: Option[String])
 
 object ExampleParser {
 
@@ -46,7 +46,7 @@ object ExampleParser {
 		val output = lines(cursor)
 		assert(output.nonEmpty)
 
-		Example(title, input, output)
+		Example(title, input, Some(output))
 	}
 
 	def parse_files(clazz: Class[?]): Array[Example] = {
@@ -64,10 +64,17 @@ object ExampleParser {
 		files.map(file => {
 			val label = file.getName.drop(expect_prefix.length).dropRight(expect_suffix.length)
 			val text = Files.readString(file.toPath)
-			parse_file(label, text)
+			if (label.startsWith("wa")) {
+				parse_wa_file(label, text)
+			} else if (label.startsWith("err")) {
+				parse_err_file(label, text)
+			} else {
+				throw new UnsupportedOperationException(s"unknown label: $label")
+				???
+			}
 		})
 	}
-	private def parse_file(label: String, text: String): Example = {
+	private def parse_wa_file(label: String, text: String): Example = {
 		assert(label.startsWith("wa"))
 
 		val header_1 = "输入"
@@ -87,7 +94,20 @@ object ExampleParser {
 			.mkString(", ")
 		val output = text.substring(header_3_idx + header_3.length).trim
 
-		Example(label, input, output)
+		Example(label, input, Some(output))
+	}
+	private def parse_err_file(label: String, text: String): Example = {
+		assert(label.startsWith("err"))
+
+		val header_1 = "最后执行的输入"
+		val header_1_idx = text.indexOf(header_1)
+		assert(header_1_idx >= 0)
+
+		val input = text.substring(header_1_idx + header_1.length).trim
+			.split("\n").map(_.trim)
+			.filterNot(_.endsWith("="))
+			.mkString(", ")
+		Example(label, input, None)
 	}
 
 }

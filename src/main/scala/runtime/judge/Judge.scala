@@ -20,7 +20,10 @@ object Judge {
 		val start = System.currentTimeMillis()
 		val returned = call(instance, method, example.input)
 		val cost = System.currentTimeMillis() - start
-		compare_result(method, example.output, returned, cost)
+		example.output match {
+			case Some(output) => compare_result(method, output, returned, cost)
+			case None => JudgeResult(cost, wrong_answer = false, "", "")
+		}
 	}
 
 	private def call(instance: Any, method: Method, input: String): Any = {

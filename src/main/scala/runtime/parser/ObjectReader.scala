@@ -1,7 +1,7 @@
 package runtime.parser
 
 import runtime.ListNode
-import runtime.parser.ObjectReader.{INT, PARAM_NAME}
+import runtime.parser.ObjectReader.{INT, STRING, PARAM_NAME}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.matching.Regex
@@ -73,6 +73,7 @@ class ObjectReader(raw: String) {
 
 		clazz.getTypeName match {
 			case "int" => take(INT).toInt
+			case "java.lang.String" => take(STRING).drop(1).dropRight(1)
 			case "runtime.ListNode" => read_list_node()
 			case t => throw new UnsupportedOperationException(s"unsupported type: $t")
 		}
@@ -118,4 +119,5 @@ class ObjectReader(raw: String) {
 object ObjectReader {
 	private val PARAM_NAME = "[a-zA-Z_][a-zA-Z0-9_]*".r
 	private val INT = """-?\d+""".r
+	private val STRING = """"[^"]*"""".r
 }
