@@ -10,7 +10,7 @@ object ToolBox {
 	def prepare_stub(id: Int): Unit = {
 		prepare_stub(LeetCodeRepo.get(id))
 	}
-	private def prepare_stub(q: QuestionFullNode): Unit = {
+	def prepare_stub(q: QuestionFullNode): Unit = {
 		val file = CodeStyle.code_file(q.id, q.title_slug)
 		if (Files.exists(file)) {
 			println(s"File $file already exists, skip")
