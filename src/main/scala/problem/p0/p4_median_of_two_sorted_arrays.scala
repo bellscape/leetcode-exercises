@@ -6,12 +6,11 @@ import runtime.WithMain
 object p4_median_of_two_sorted_arrays extends WithMain {
 	def findMedianSortedArrays(nums1: Array[Int], nums2: Array[Int]): Double = {
 		val merged = (nums1 ++ nums2).sorted
-		if (merged.length % 2 == 1) {
-			// 3 -> (1)
-			merged(merged.length / 2)
+		val n = merged.length
+		if (n % 2 == 1) {
+			merged(n / 2) // 3 -> 1
 		} else {
-			// 4 -> (1)(2)
-			(merged(merged.length / 2 - 1) + merged(merged.length / 2)) / 2.0
+			(merged(n / 2 - 1) + merged(n / 2)) / 2.0 // 4 -> 1,2
 		}
 	}
 }
