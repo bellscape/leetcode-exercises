@@ -5,7 +5,7 @@ import runtime.WithMain
 import scala.util.Random
 
 // 实际上更慢（time 43%, mem 14%）
-// 备忘：题目已保证 num1/num2 有序，没必要额外排序
+// 备忘：高估了，题目已保证 num1/num2 有序，没必要额外排序
 object p4_median_of_two_sorted_arrays__v2 extends WithMain {
 	def findMedianSortedArrays(nums1: Array[Int], nums2: Array[Int]): Double = {
 
