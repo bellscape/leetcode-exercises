@@ -6,7 +6,7 @@ import java.nio.file.{Path, Paths}
 
 object CodeStyle {
 
-	private def package_name(id: Int): String = s"problem.p${id - id % 20}"
+	private def package_name(id: Int): String = s"problem.p${id - id % 10}"
 	private def class_name(id: Int, title_slug: String): String = s"p${id}_${title_slug.replace('-', '_')}"
 
 	def code_file(id: Int, title_slug: String): Path = {
