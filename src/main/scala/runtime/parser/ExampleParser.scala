@@ -13,9 +13,9 @@ object ExampleParser {
 	def parse_html(html: String): Array[Example] = {
 		val doc = Jsoup.parseBodyFragment(html)
 		val pres = doc.select("pre")
-		pres.asScala.map(parse_html_pre).toArray
+		pres.asScala.flatMap(parse_html_pre).toArray
 	}
-	private def parse_html_pre(pre: Element): Example = {
+	private def parse_html_pre(pre: Element): Option[Example] = {
 		// check: <p>Example 1:</p>
 		var previous_elem = pre.previousElementSibling
 		while (previous_elem != null && previous_elem.tagName == "img") {
@@ -23,7 +23,8 @@ object ExampleParser {
 		}
 		assert(previous_elem != null && previous_elem.tagName() == "p")
 		val title = previous_elem.text.trim.replaceFirst(":$", "")
-		assert(title.startsWith("Example "))
+		// assert(title.startsWith("Example "), s"title = $title")
+		if (!title.startsWith("Example")) return None
 
 		// <strong>Input:</strong>, <strong>Output:</strong>
 		val lines = pre.childNodes().asScala.map {
@@ -46,7 +47,7 @@ object ExampleParser {
 		val output = lines(cursor)
 		assert(output.nonEmpty)
 
-		Example(title, input, Some(output))
+		Some(Example(title, input, Some(output)))
 	}
 
 	def parse_files(clazz: Class[?]): Array[Example] = {
