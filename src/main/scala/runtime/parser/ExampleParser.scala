@@ -67,7 +67,7 @@ object ExampleParser {
 			val text = Files.readString(file.toPath)
 			if (label.startsWith("wa")) {
 				parse_wa_file(label, text)
-			} else if (label.startsWith("err")) {
+			} else if (label.startsWith("err") || label.startsWith("timeout")) {
 				parse_err_file(label, text)
 			} else {
 				throw new UnsupportedOperationException(s"unknown label: $label")
@@ -76,8 +76,6 @@ object ExampleParser {
 		})
 	}
 	private def parse_wa_file(label: String, text: String): Example = {
-		assert(label.startsWith("wa"))
-
 		val header_1 = "输入"
 		val header_2 = "输出"
 		val header_3 = "预期结果"
@@ -98,8 +96,6 @@ object ExampleParser {
 		Example(label, input, Some(output))
 	}
 	private def parse_err_file(label: String, text: String): Example = {
-		assert(label.startsWith("err"))
-
 		val header_1 = "最后执行的输入"
 		val header_1_idx = text.indexOf(header_1)
 		assert(header_1_idx >= 0)
