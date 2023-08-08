@@ -21,16 +21,16 @@ object p10_regular_expression_matching extends WithMain {
 	case class Rule(c: Char, var is_star: Boolean) {
 		def is_wildcard: Boolean = c == '.'
 	}
-	private def parse_pattern(p: String): Seq[Rule] = {
+	private def parse_pattern(p: String): collection.Seq[Rule] = {
 		val rules = ArrayBuffer.empty[Rule]
-		p.chars().forEach(c => {
+		for (c <- p) {
 			if (c == '*') {
 				rules.last.is_star = true
 			} else {
-				rules += Rule(c.toChar, is_star = false)
+				rules += Rule(c, is_star = false)
 			}
-		})
-		rules.toSeq
+		}
+		rules
 	}
 
 	private def next_cursor(s: String, rule: Rule, cursors: Seq[Int]): Seq[Int] = {

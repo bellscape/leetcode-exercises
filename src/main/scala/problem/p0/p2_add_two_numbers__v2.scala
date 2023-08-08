@@ -12,10 +12,16 @@ object p2_add_two_numbers__v2 extends WithMain {
 			if (a == null) return b
 			if (b == null) return a
 		}
-		val sum = (if (carry) 1 else 0) + (if (a != null) a.x else 0) + (if (b != null) b.x else 0)
+
+		var sum = if (carry) 1 else 0
+		if (a != null) sum += a.x
+		if (b != null) sum += b.x
+
 		new ListNode(
 			sum % 10,
-			add(if (a != null) a.next else null, if (b != null) b.next else null, sum >= 10)
+			add(if (a != null) a.next else null,
+				if (b != null) b.next else null,
+				sum >= 10)
 		)
 	}
 }

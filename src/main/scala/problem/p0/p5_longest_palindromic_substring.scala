@@ -2,52 +2,41 @@ package problem.p0
 
 import runtime.WithMain
 
-// time 63% mem 11%
-// 思路错误：无重用计算，不应按动态规划处理
+// 思路：先找所有“连续字符”，再对每个区域向两边扩展
+// time 100% mem 74%
 object p5_longest_palindromic_substring extends WithMain {
 	def longestPalindrome(s: String): String = {
 		assert(s.nonEmpty)
 
-		// 奇数长度: mid-2, len-1 => [2,3), len-3 => [1,4), len-5 => [0,5)
-		// 偶数长度: mid-2, len-0 => [2,2), len-2 => [1,3), len-4 => [0,4)
-		def get_from(mid: Int, len: Int): Int = mid - len / 2
+		val n = s.length
+		var best_from = 0
+		var best_len = 1
 
-		def can_grow_to(mid: Int, len: Int): Boolean = {
-			val from = get_from(mid, len)
-			val until = from + len
-			from >= 0 && until <= s.length && s(from) == s(until - 1)
-		}
+		var cursor = 0
+		while (cursor < s.length) {
+			// 确定连续字符区域
+			var from = cursor
+			var until = cursor + 1
+			while (until < n && s(until) == s(from)) {
+				until += 1
+			}
+			cursor = until
 
-		var max_len = 1
-		var max_mid = 0
-
-		// try 奇数长度
-		var len = 1
-		var candidates: Seq[Int] = 1 until (s.length - 1)
-		while (candidates.nonEmpty) {
-			len += 2
-			candidates = candidates.filter(can_grow_to(_, len))
-			if (len > max_len && candidates.nonEmpty) {
-				max_len = len
-				max_mid = candidates.head
+			// 尝试外扩
+			val max_len = until - from + from.min(n - until) * 2
+			if (max_len > best_len) {
+				while (from > 0 && until < n && s(from - 1) == s(until)) {
+					from -= 1
+					until += 1
+				}
+				val len = until - from
+				if (len > best_len) {
+					best_from = from
+					best_len = len
+				}
 			}
 		}
 
-		// try 偶数长度
-		assert(max_len % 2 == 1)
-		val skip_edge = (max_len + 1) / 2
-		len = 0
-		candidates = skip_edge to (s.length - skip_edge)
-		while (candidates.nonEmpty) {
-			len += 2
-			candidates = candidates.filter(can_grow_to(_, len))
-			if (len > max_len && candidates.nonEmpty) {
-				max_len = len
-				max_mid = candidates.head
-			}
-		}
-
-		val max_from = get_from(max_mid, max_len)
-		s.slice(max_from, max_from + max_len)
+		s.slice(best_from, best_from + best_len)
 	}
 }

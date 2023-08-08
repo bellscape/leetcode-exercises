@@ -2,12 +2,11 @@ package problem.p10
 
 import runtime.WithMain
 
+// 思路：参考题解，“双指针”
 // time: 89%, memory: 44%
-object p11_container_with_most_water__v4 extends WithMain {
+object p11_container_with_most_water extends WithMain {
 	def maxArea(height: Array[Int]): Int = {
 		assert(height.length >= 2)
-
-		// 思路：参考题解，“双指针”
 
 		var left = 0
 		var right = height.length - 1
