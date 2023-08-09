@@ -37,7 +37,7 @@ trait WithMain {
 			val suffix = if (result.wrong_answer) {
 				s"""   // output mismatch
 				   |\t input:  ${example.input}
-				   |\t expect: ${example.output}
+				   |\t expect: ${example.output.getOrElse("")}
 				   |\t actual: ${result.actual_output}""".stripMargin
 			} else if (result.time_limit_exceeded) "   // timeout" else ""
 			println(s"$icon ${example.label}: $cost$suffix")

@@ -61,6 +61,7 @@ object Judge {
 	private def format_obj(obj: Any): String = {
 		obj match {
 			case arr: Array[_] => arr.map(format_obj).mkString("[", ",", "]")
+			case list: List[_] => list.map(format_obj).mkString("[", ",", "]")
 			case list: ListNode => {
 				val out = ArrayBuffer.empty[Int]
 				var cur = list
