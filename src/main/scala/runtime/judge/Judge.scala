@@ -1,7 +1,8 @@
 package runtime.judge
 
 import runtime.ListNode
-import runtime.parser.{Example, ObjectReader}
+import runtime.parser.{Example, ObjectReader2}
+import runtime.repo.MetaDataNode
 
 import java.lang.reflect.{Method, Modifier}
 import scala.collection.mutable.ArrayBuffer
@@ -13,28 +14,30 @@ case class JudgeResult(cost: Long, wrong_answer: Boolean, expect_output: String,
 
 object Judge {
 
-	def run(instance: Any, method: Method, example: Example): JudgeResult = {
+	def run(instance: Any, method: Method, example: Example, meta: MetaDataNode): JudgeResult = {
 		assert(!Modifier.isStatic(method.getModifiers))
 		assert(Modifier.isPublic(method.getModifiers))
 
-		val start = System.currentTimeMillis()
-		val returned = call(instance, method, example.input)
-		val cost = System.currentTimeMillis() - start
+		val (cost, actual_output) = call(instance, method, example.input, meta)
 		example.output match {
-			case Some(output) => compare_result(method, output, returned, cost)
+			case Some(expect_output) => compare_result(meta, expect_output, actual_output, cost)
 			case None => JudgeResult(cost, wrong_answer = false, "", "")
 		}
 	}
 
-	private def call(instance: Any, method: Method, input: String): Any = {
-		val reader = new ObjectReader(input)
-		val args: Array[Any] = method.getParameterTypes.map(reader.read_param)
+	private def call(instance: Any, method: Method, input: String, meta: MetaDataNode): (Long, Any) = {
+		val reader = new ObjectReader2(input)
+		val args: Array[Any] = meta.params.map(p => reader.read_param(p.`type`))
 		assert(reader.eof)
-		method.invoke(instance, args: _*)
+
+		val start = System.currentTimeMillis()
+		val returned = method.invoke(instance, args: _*)
+		val cost = System.currentTimeMillis() - start
+		(cost, returned)
 	}
 
-	private def compare_result(method: Method, expect_str: String, actual: Any, cost: Long): JudgeResult = {
-		val expect = new ObjectReader(expect_str).read_return(method.getReturnType)
+	private def compare_result(meta: MetaDataNode, expect_str: String, actual: Any, cost: Long): JudgeResult = {
+		val expect = new ObjectReader2(expect_str).read_return(meta.`return`.`type`)
 		val wrong_answer = !is_equal(expect, actual)
 		JudgeResult(cost, wrong_answer, expect_str, format_obj(actual))
 	}

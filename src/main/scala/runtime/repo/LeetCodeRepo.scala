@@ -113,4 +113,4 @@ case class CodeSnippetNode
 )
 case class MetaDataNode(name: String, params: Array[MetaDataParamNode], `return`: MetaDataReturnNode, manual: Boolean)
 case class MetaDataParamNode(name: String, `type`: String, dealloc: Boolean = false)
-case class MetaDataReturnNode(`type`: String, size: Int = 0, dealloc: Boolean = false)
+case class MetaDataReturnNode(`type`: String, size: Int = 0, colsize: Int = 0, dealloc: Boolean = false)

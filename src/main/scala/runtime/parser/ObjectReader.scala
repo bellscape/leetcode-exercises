@@ -10,24 +10,24 @@ class ObjectReader(raw: String) {
 	private var cursor = 0
 
 	def eof: Boolean = cursor >= raw.length
-	def peak: Char = raw.charAt(cursor)
+	protected def peak: Char = raw.charAt(cursor)
 
-	private def drop(r: Regex): Unit = {
+	protected def drop(r: Regex): Unit = {
 		val m = r.pattern.matcher(raw)
 		val found = m.find(cursor)
 		assert(found && m.start() == cursor)
 		cursor = m.end()
 	}
-	private def drop_whitespace(): Unit = {
+	protected def drop_whitespace(): Unit = {
 		while (!eof && Character.isWhitespace(peak))
 			cursor += 1
 	}
-	private def drop(prefix: String): Unit = {
+	protected def drop(prefix: String): Unit = {
 		assert(raw.startsWith(prefix, cursor))
 		cursor += prefix.length
 	}
 
-	private def take(r: Regex): String = {
+	protected def take(r: Regex): String = {
 		val m = r.pattern.matcher(raw)
 		val found = m.find(cursor)
 		assert(found && m.start() == cursor)
@@ -72,10 +72,10 @@ class ObjectReader(raw: String) {
 		}
 
 		clazz.getTypeName match {
-			case "int" => take(INT).toInt
-			case "double" => take(DOUBLE).toDouble
-			case "boolean" => take(BOOL).toBoolean
-			case "java.lang.String" => take(STRING).drop(1).dropRight(1)
+			case "int" => take(INT_VALUE).toInt
+			case "double" => take(DOUBLE_VALUE).toDouble
+			case "boolean" => take(BOOL_VALUE).toBoolean
+			case "java.lang.String" => take(STRING_VALUE).drop(1).dropRight(1)
 			case "runtime.ListNode" => read_list_node()
 			case t => throw new UnsupportedOperationException(s"unsupported type: $t")
 		}
@@ -106,6 +106,9 @@ class ObjectReader(raw: String) {
 
 	private def read_list_node(): ListNode = {
 		val array = read_array(classOf[Int]).asInstanceOf[Array[Int]]
+		build_list_node_from_array(array)
+	}
+	protected def build_list_node_from_array(array: Array[Int]): ListNode = {
 		assert(array.nonEmpty)
 		val dummy = new ListNode()
 		var cur = dummy
@@ -119,9 +122,9 @@ class ObjectReader(raw: String) {
 }
 
 object ObjectReader {
-	private val PARAM_NAME = "[a-zA-Z_][a-zA-Z0-9_]*".r
-	private val INT = """-?\d+""".r
-	private val DOUBLE = """-?[\d.]+""".r
-	private val BOOL = """true|false""".r
-	private val STRING = """"[^"]*"""".r
+	val PARAM_NAME: Regex = "[a-zA-Z_][a-zA-Z0-9_]*".r
+	val INT_VALUE: Regex = """-?\d+""".r
+	val DOUBLE_VALUE: Regex = """-?[\d.]+""".r
+	val BOOL_VALUE: Regex = """true|false""".r
+	val STRING_VALUE: Regex = """"[^"]*"""".r
 }

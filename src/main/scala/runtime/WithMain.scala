@@ -30,7 +30,7 @@ trait WithMain {
 		val examples_1 = ExampleParser.parse_html(q.content)
 		val examples_2 = ExampleParser.parse_files(getClass)
 		for (example <- examples_1 ++ examples_2) {
-			val result = Judge.run(this, method, example)
+			val result = Judge.run(this, method, example, meta)
 
 			val icon = if (result.ok) "✔" else "✘"
 			val cost = s"cost ${result.cost} ms"
