@@ -51,11 +51,11 @@ class test_example_parser extends AnyFunSuite {
 		val examples = ExampleParser.parse_html(html)
 		assert(examples.length === 3)
 		assert(examples(0).input === "nums = [2,7,11,15], target = 9")
-		assert(examples(0).output === "[0,1]")
+		assert(examples(0).output === Some("[0,1]"))
 		assert(examples(1).input === "nums = [3,2,4], target = 6")
-		assert(examples(1).output === "[1,2]")
+		assert(examples(1).output === Some("[1,2]"))
 		assert(examples(2).input === "nums = [3,3], target = 6")
-		assert(examples(2).output === "[0,1]")
+		assert(examples(2).output === Some("[0,1]"))
 	}
 
 }
