@@ -42,14 +42,16 @@ object Judge {
 		JudgeResult(cost, wrong_answer, expect_str, format_obj(actual))
 	}
 	private def is_equal(a: Any, b: Any): Boolean = {
-		if (a.getClass.isArray) {
+		if (a == b) return true
+
+		if (a != null && a.getClass.isArray) {
 			b.getClass.isArray && a.asInstanceOf[Array[_]].zip(b.asInstanceOf[Array[_]]).forall { case (a, b) =>
 				is_equal(a, b)
 			}
 		} else if (a.isInstanceOf[ListNode]) {
 			b.isInstanceOf[ListNode] && is_list_node_equal(a.asInstanceOf[ListNode], b.asInstanceOf[ListNode])
 		} else {
-			a == b
+			false
 		}
 	}
 	private def is_list_node_equal(a: ListNode, b: ListNode): Boolean = {
@@ -71,7 +73,7 @@ object Judge {
 				}
 				out.mkString("[", ",", "]")
 			}
-			case _ => obj.toString
+			case _ => String.valueOf(obj)
 		}
 	}
 

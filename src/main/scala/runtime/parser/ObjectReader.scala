@@ -109,7 +109,9 @@ class ObjectReader(raw: String) {
 		build_list_node_from_array(array)
 	}
 	protected def build_list_node_from_array(array: Array[Int]): ListNode = {
-		assert(array.nonEmpty)
+		// assert(array.nonEmpty) // p19
+		if (array.isEmpty) return null
+
 		val dummy = new ListNode()
 		var cur = dummy
 		for (elem <- array) {
