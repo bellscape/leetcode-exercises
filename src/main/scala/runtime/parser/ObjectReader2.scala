@@ -45,6 +45,7 @@ class ObjectReader2(raw: String) extends ObjectReader(raw) {
 	private def read_object(clazz: String): Any = clazz match {
 		case "integer" => take(ObjectReader.INT_VALUE).toInt
 		case "double" => take(ObjectReader.DOUBLE_VALUE).toDouble
+		case "boolean" => take(ObjectReader.BOOL_VALUE).toBoolean
 		case "string" => take(ObjectReader.STRING_VALUE).drop(1).dropRight(1) // 假定无转义
 
 		case "ListNode" => read_list_node()
