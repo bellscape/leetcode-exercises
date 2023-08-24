@@ -51,6 +51,7 @@ class ObjectReader2(raw: String) extends ObjectReader(raw) {
 		case "ListNode" => read_list_node()
 
 		case "integer[]" => read_array[Int]("integer")
+		case "ListNode[]" => read_array[ListNode]("ListNode")
 		case "list<integer>" => read_array[Int]("integer").toList
 		case "list<list<integer>>" => read_array[List[Int]]("list<integer>").toList
 		case "list<string>" => read_array[String]("string").toList
