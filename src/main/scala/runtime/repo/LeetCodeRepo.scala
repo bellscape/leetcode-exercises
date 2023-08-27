@@ -1,6 +1,6 @@
 package runtime.repo
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 
 object LeetCodeRepo {
@@ -111,6 +111,7 @@ case class CodeSnippetNode
 	code: String,
 	__typename: String
 )
-case class MetaDataNode(name: String, params: Array[MetaDataParamNode], `return`: MetaDataReturnNode, manual: Boolean)
+case class MetaDataNode(name: String, params: Array[MetaDataParamNode], `return`: MetaDataReturnNode, manual: Boolean, output: JsonNode)
 case class MetaDataParamNode(name: String, `type`: String, dealloc: Boolean = false)
 case class MetaDataReturnNode(`type`: String, size: Int = 0, colsize: Int = 0, dealloc: Boolean = false)
+// p26: case class MetaDataOutputNode(paramindex: Int, size: String)

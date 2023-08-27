@@ -36,9 +36,9 @@ class ObjectReader2(raw: String) extends ObjectReader(raw) {
 
 		out
 	}
-	def read_return(clazz: String): Any = {
+	def read_return(clazz: String, check_eof: Boolean = true): Any = {
 		val out = read_object(clazz)
-		assert(eof)
+		if (check_eof) assert(eof)
 		out
 	}
 

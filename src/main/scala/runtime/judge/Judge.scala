@@ -37,7 +37,8 @@ object Judge {
 	}
 
 	private def compare_result(meta: MetaDataNode, expect_str: String, actual: Any, cost: Long): JudgeResult = {
-		val expect = new ObjectReader2(expect_str).read_return(meta.`return`.`type`)
+		val simple_return_type = meta.`return` == null
+		val expect = new ObjectReader2(expect_str).read_return(meta.`return`.`type`, simple_return_type)
 		val wrong_answer = !is_equal(expect, actual)
 		JudgeResult(cost, wrong_answer, expect_str, format_obj(actual))
 	}
