@@ -14,7 +14,7 @@ class test_judge extends AnyFunSuite {
 		val method = Sample.getClass.getDeclaredMethod("sample_add", classOf[Int], classOf[Int])
 		val meta = MetaDataNode("sample_add", Array(
 			MetaDataParamNode("a", "integer"), MetaDataParamNode("b", "integer")
-		), MetaDataReturnNode("integer"), manual = false)
+		), MetaDataReturnNode("integer"), manual = false, output = null)
 
 		val example_1 = Example("test 1", "1,2", Some("3")) // ok
 		val result_1 = Judge.run(Sample, method, example_1, meta)
