@@ -46,7 +46,7 @@ class ObjectReader2(raw: String) extends ObjectReader(raw) {
 		case "integer" => take(ObjectReader.INT_VALUE).toInt
 		case "double" => take(ObjectReader.DOUBLE_VALUE).toDouble
 		case "boolean" => take(ObjectReader.BOOL_VALUE).toBoolean
-		case "string" => take(ObjectReader.STRING_VALUE).drop(1).dropRight(1) // 假定无转义
+		case "string" => take(ObjectReader.STRING_VALUE).drop(1).dropRight(1)
 
 		case "ListNode" => read_list_node()
 
@@ -58,6 +58,9 @@ class ObjectReader2(raw: String) extends ObjectReader(raw) {
 		case "list<string>" => read_array[String]("string").toList
 
 		case "void" => null // p31
+		case "character" => take(ObjectReader.CHAR_VALUE)(1) // p36
+		case "character[]" => read_array[Char]("character") // p36
+		case "character[][]" => read_array[Array[Char]]("character[]") // p36
 
 		case _ => throw new RuntimeException(s"unsupported type: $clazz")
 	}

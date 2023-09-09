@@ -128,5 +128,6 @@ object ObjectReader {
 	val INT_VALUE: Regex = """-?\d+""".r
 	val DOUBLE_VALUE: Regex = """-?[\d.]+""".r
 	val BOOL_VALUE: Regex = """true|false""".r
-	val STRING_VALUE: Regex = """"[^"]*"""".r
+	val STRING_VALUE: Regex = """"[^"]*"""".r // 假定无转义
+	val CHAR_VALUE: Regex = """"[^"]"""".r // 假定无转义
 }
