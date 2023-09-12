@@ -22,23 +22,21 @@ object p39_combination_sum extends WithMain {
 				return
 			}
 
-			// case: 优化：最后一个数字
+			// case: 无合适数字
 			val num = candidates(i)
+			if (left < num) return
+
 			if (i == candidates.length - 1) {
+				// case: 最后一个数字
 				if (left % num == 0) {
 					out += prev.reverse ++ List.fill(left / candidates(i))(candidates(i))
 				}
-				return
+			} else {
+				// try: 选当前数字
+				dfs(i, left - num, num :: prev)
+				// try: 不选当前数字
+				dfs(i + 1, left, prev)
 			}
-
-			// case: 无合适数字
-			if (left < num) return
-
-			// try: 选当前数字
-			dfs(i, left - num, num :: prev)
-
-			// try: 不选当前数字
-			dfs(i + 1, left, prev)
 		}
 
 		dfs(0, target, List.empty[Int])
