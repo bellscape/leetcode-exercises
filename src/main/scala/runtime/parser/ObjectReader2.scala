@@ -62,6 +62,7 @@ class ObjectReader2(raw: String) extends ObjectReader(raw) {
 		case "character[]" => read_array[Char]("character") // p36
 		case "character[][]" => read_array[Array[Char]]("character[]") // p36
 		case "integer[][]" => read_array[Array[Int]]("integer[]") // p48
+		case "list<list<string>>" => read_array[List[String]]("list<string>").toList // p49
 
 		case _ => throw new RuntimeException(s"unsupported type: $clazz")
 	}
