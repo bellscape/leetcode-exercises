@@ -1,11 +1,14 @@
 package runtime.repo
 
-import java.net.URI
+import java.net.{Socket, URI}
 import java.net.http.{HttpClient, HttpRequest, HttpResponse}
 import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.{Files, Path}
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+import javax.net.ssl.{SSLContext, SSLEngine, X509ExtendedTrustManager}
 
-private[repo] object leetcode_client {
+object LeetcodeClient {
 
 	def all_questions(): String = {
 		val payload = """{"operationName":"allQuestions","variables":{},"query":"query allQuestions {\n  allQuestionsBeta {\n    ...questionSummaryFields\n    __typename\n  }\n}\n\nfragment questionSummaryFields on QuestionNode {\n  title\n  titleSlug\n  translatedTitle\n  questionId\n  questionFrontendId\n  status\n  difficulty\n  isPaidOnly\n  categoryTitle\n  __typename\n}\n"}"""
@@ -19,8 +22,11 @@ private[repo] object leetcode_client {
 	}
 
 	private def call_graph_ql(payload: String): String = {
+		// 需要 https，http 返回 308 Permanent Redirect
+		val url = "https://leetcode.cn/graphql/"
+
 		val req = HttpRequest.newBuilder()
-			.uri(URI.create("https://leetcode.cn/graphql/"))
+			.uri(URI.create(url))
 			.header("Content-Type", "application/json")
 			.POST(HttpRequest.BodyPublishers.ofString(payload))
 			.build()
@@ -28,7 +34,28 @@ private[repo] object leetcode_client {
 		assert(resp.statusCode() == 200)
 		resp.body()
 	}
-	private val client: HttpClient = HttpClient.newBuilder().build()
+	private val skip_ssl_verification = false
+	private val client: HttpClient = {
+		val builder = HttpClient.newBuilder()
+		if (skip_ssl_verification) {
+			// https://www.baeldung.com/java-httpclient-ssl
+
+			val mock_trust_manager = new X509ExtendedTrustManager {
+				override def checkClientTrusted(chain: Array[X509Certificate], authType: String, socket: Socket): Unit = {}
+				override def checkServerTrusted(chain: Array[X509Certificate], authType: String, socket: Socket): Unit = {}
+				override def checkClientTrusted(chain: Array[X509Certificate], authType: String, engine: SSLEngine): Unit = {}
+				override def checkServerTrusted(chain: Array[X509Certificate], authType: String, engine: SSLEngine): Unit = {}
+				override def checkClientTrusted(chain: Array[X509Certificate], authType: String): Unit = {}
+				override def checkServerTrusted(chain: Array[X509Certificate], authType: String): Unit = {}
+				override def getAcceptedIssuers: Array[X509Certificate] = Array.empty
+			}
+			val ssl_context = SSLContext.getInstance("TLS")
+			ssl_context.init(null, Array(mock_trust_manager), new SecureRandom())
+
+			builder.sslContext(ssl_context)
+		}
+		builder.build()
+	}
 
 	def load_with_cache(cache: String, f: => String): String = {
 		val file = Path.of(cache)

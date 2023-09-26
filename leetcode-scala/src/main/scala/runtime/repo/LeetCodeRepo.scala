@@ -16,9 +16,9 @@ object LeetCodeRepo {
 	private lazy val index: Array[QuestionIndexNode] = fetch_all()
 
 	private def fetch_all(): Array[QuestionIndexNode] = {
-		val json = leetcode_client.load_with_cache(
+		val json = LeetcodeClient.load_with_cache(
 			"cache/all.json",
-			leetcode_client.all_questions()
+			LeetcodeClient.all_questions()
 		)
 		val root = mapper.readTree(json)
 		val questions = root.get("data").get("allQuestionsBeta")
@@ -26,9 +26,9 @@ object LeetCodeRepo {
 	}
 	private def fetch_question(prefix: String, title_slug: String): QuestionFullNode = {
 		assert(title_slug.matches("""[\w-]+"""))
-		val json = leetcode_client.load_with_cache(
+		val json = LeetcodeClient.load_with_cache(
 			s"cache/problem/$prefix--$title_slug.json",
-			leetcode_client.question_data(title_slug)
+			LeetcodeClient.question_data(title_slug)
 		)
 		val root = mapper.readTree(json)
 		val question = root.get("data").get("question")
