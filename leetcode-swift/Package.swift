@@ -8,10 +8,10 @@ let package = Package(
     dependencies: [],
     targets: [
         .target(
-            name: "leetcode-exercises",
+            name: "exercises",
             dependencies: []),
         .testTarget(
-            name: "leetcode-exercises-tests",
-            dependencies: ["leetcode-exercises"]),
+            name: "exercises-tests",
+            dependencies: ["exercises"]),
     ]
 )

@@ -6,12 +6,12 @@ import scala.collection.mutable
 
 object p1_two_sum extends WithMain {
 	def twoSum(nums: Array[Int], target: Int): Array[Int] = {
-		val num2idx = mutable.HashMap.empty[Int, Int]
-		for ((num, idx) <- nums.zipWithIndex) {
-			val num2 = target - num
-			num2idx.get(num2) match {
-				case Some(idx2) => return Array(idx2, idx)
-				case None => num2idx(num) = idx
+		val num_to_idx = mutable.HashMap.empty[Int, Int]
+		for ((n2, i2) <- nums.zipWithIndex) {
+			val n1 = target - n2
+			num_to_idx.get(n1) match {
+				case Some(i1) => return Array(i1, i2)
+				case None => num_to_idx(n2) = i2
 			}
 		}
 		???
